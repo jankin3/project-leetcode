@@ -3,12 +3,13 @@
 https://leetcode-cn.com/problems/coin-change-2/
 
 ## 题目描述
+给定n中不同面额的硬币coins和一个总金额amount。写出函数来计算可以凑成总金额的硬币组合数。假设每一种面额的硬币有无限个。 
 
-思路：观察得出，当选择了一个x游戏币之后，（ｎ,m） 问题就变成了(n-1, m-x)问题，状态发生了转移。直接想到使用递归的方法写，写完发现任然有优化空间，然后转移到了动态规划算法。使用二维数组存储结果，每一个新的结果都可以依赖历史结果得出结果。二维数组最后一个结果即是最终所需结果.
-备注：下面代码不仅算出了多少种，实际存储了每种的排列结果。
+### 思路
+｀完全背包｀问题，不过不是获取最大价值，而是得到固定价值的组合
 
 ### 复杂度分析
-时间复杂度： n*m
+时间复杂度： n*amount
 空间复杂度： m
 
 ###　代码
@@ -17,56 +18,20 @@ https://leetcode-cn.com/problems/coin-change-2/
 # -*- coding: utf-8 -*-
 import copy
 class Solution():
-    def coin_combine_recursive(self, l, n, m):
-        # 递归思路，代码简单
-        if n == 1:
-            return [[m,],] if m in l else []
-        else:
-            r_list = []
-            for x in l:
-                x_result = []
-                if m - x > 0 and n-1 > 0:
-                    rest_list = self.find_n_m_sum(l, n-1, m-x)
-                    if rest_list:
-                        for r in rest_list:
-                            x_result.append(r+[x])
-                if x_result:
-                    r_list += x_result
-            return r_list
+    def coin_combine_only_num(self, coin, amount):
+    '''
+    只计算出种类,递归的思路不同
+    :param amount:
+    :param coins:
+    :return:
+    '''
+    dp = [0] * (amount + 1)
+    dp[0] = 1
 
-    def coin_combine(self, l, n, m):
-        # 动态规划算法
-        dp = []
-        for i in range(1, n+1):
-            # print('-------------------i--------------------', i)
-            n_list = []
-            for j in range(1, m+1):
-                # print('-------------------j--------------------', j)
-                item = []
-                if i == 1:
-                    if j in l:
-                        item = [[j]]
-                    else:
-                        item = []
-                else:
-                    for x in l:
-                        if j - x > 0:
-
-                            history_list = dp[i-1-1][j-x-1]
-                            rest_list = copy.deepcopy(history_list)
-                            # print('rest_list', rest_list)
-                            if rest_list:
-                                for result_item in rest_list:
-                                    if x:
-                                        result_item.append(x)
-                                        # 排序为了去重
-                                        result_item.sort()
-                            for r in rest_list:
-                                if r not in item:
-                                    item.append(r)
-                n_list.append(item)
-            dp.append(n_list)
-        return dp[n-1][m-1]
+    for coin in coins:
+        for x in range(coin, amount + 1):
+            dp[x] += dp[x - coin]
+    return dp[amount]
 
 # # 去重优化
 l = [1, 2, 5, 10, 20, 50]
@@ -74,7 +39,7 @@ l = [1, 2, 5, 10, 20, 50]
 # print(r)
 
 s = Solution()
-r = s.coin_combine(l, 6, 100)
+r = s.coin_combine(l, 100)
 print('result')
 print(r)
 ```
